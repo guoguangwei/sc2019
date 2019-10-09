@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.patriarch.dao.PatriarchDao">
+
+    <!-- 查询家长信息 -->
+    <select id="listPatriarchInfo" resultType="java.util.Map" parameterType="java.util.Map">
+        select t.patriarch_no,
+          t.patriarch_name,
+          t.patriarch_phone,
+          s.store_name,
+          DATE_FORMAT(t.gmt_create,'%Y-%m-%d %H:%i:%s') gmt_create,
+          t.user_no,
+          t.store_no,
+          u.user_acct
+        from t_patriarch_info t
+        left join t_store_info s
+        on t.store_no = s.store_no
+        left join t_sys_user u
+        on t.user_no = u.user_code
+        where t.is_deleted = 0
+        and (s.is_deleted = 0
+        or s.is_deleted is null)
+        and u.is_deleted = 0
+        <if test="patriarch_name != null and patriarch_name != '' ">
+            and t.patriarch_name like concat('%', concat(#{patriarch_name}, '%'))
+        </if>
+        <if test="patriarch_phone != null and patriarch_phone != '' ">
+            and t.patriarch_phone like concat('%', concat(#{patriarch_phone}, '%'))
+        </if>
+        <if test="store_name != null and store_name != '' ">
+            and s.store_name like concat('%', concat(#{store_name}, '%'))
+        </if>
+        <if test="store_no != null and store_no != '' ">
+            and t.store_no like concat('%', concat(#{store_no}, '%'))
+        </if>
+        <if test="user_acct != null and user_acct != '' ">
+            and u.user_acct like concat('%', concat(#{user_acct}, '%'))
+        </if>
+        <if test='is_admin == "0"'>
+            and t.store_no = (select s.store_no
+            from t_store_info s
+            where s.is_deleted = 0
+            and s.user_code = #{user_code} limit 1)
+        </if>
+        order by t.gmt_create desc
+    </select>
+
+    <!-- 删除家长信息 -->
+    <update id="removePatriarchInfo" parameterType="java.util.Map">
+        update t_patriarch_info
+        <set>
+            gmt_modified = NOW(),
+            is_deleted = '1',
+            last_modified_by = #{user_code},
+            version = version + 1,
+        </set>
+        where user_no in
+        <foreach collection="user_no_list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!-- 删除家长对应的角色信息 -->
+    <update id="removePatriarchRole" parameterType="java.util.Map">
+        update t_sys_user_role
+        <set>
+            gmt_modified = NOW(),
+            is_deleted = '1',
+            last_modified_by = #{user_code},
+            version = version + 1,
+        </set>
+        where user_code in
+        <foreach collection="user_no_list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        AND role_code = '1'
+    </update>
+
+    <!-- 查询是否有家长存在未完成的订单 -->
+    <select id="listUnfinishedOrderUser" resultType="java.lang.String"
+            parameterType="java.util.List">
+            SELECT
+                DISTINCT user_code
+            FROM
+                t_order_master
+            WHERE
+                user_code IN
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            AND is_deleted = 0
+            AND (
+                order_status != 5
+                OR order_status IS NULL
+            )
+    </select>
+
+    <!-- 查询出有角色信息的用户列表 -->
+    <select id="listHaveRoleUser" resultType="java.lang.String" parameterType="java.util.Map">
+        select
+              distinct user_code
+        from
+              t_sys_user_role
+        where
+              user_code in
+        <foreach collection="user_no_list" item="item" index="index" separator="," open="(" close=")">
+              #{item}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+    <!-- 删除用户信息 -->
+    <update id="removeUserInfo"  parameterType="java.util.Map">
+        update t_sys_user
+        <set>
+            gmt_modified = NOW(),
+            is_deleted = '1',
+            last_modified_by = #{user_code},
+            version = version + 1,
+        </set>
+        where user_code in
+        <foreach collection="user_no_list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+</mapper>

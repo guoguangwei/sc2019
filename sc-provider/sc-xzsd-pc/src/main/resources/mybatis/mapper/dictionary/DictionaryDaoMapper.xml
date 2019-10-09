@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.dictionary.dao.DictionaryDao">
+    <resultMap id="BaseResultMap" type="com.xzsd.pc.dictionary.entity.DictionaryVO" >
+        <result column="dict_value" property="dictValue" jdbcType="VARCHAR" />
+        <result column="dict_name" property="dictName" jdbcType="VARCHAR" />
+        <result column="dict_type" property="dictType" jdbcType="VARCHAR" />
+        <result column="parent_code" property="parentCode" jdbcType="VARCHAR" />
+        <result column="public_type" property="publicType" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="is_deleted" property="isDeleted" jdbcType="INTEGER" />
+        <result column="id" property="id" jdbcType="VARCHAR" />
+        <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
+        <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP" />
+        <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+        <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP" />
+        <result column="last_modified_by" property="lastModifiedBy" jdbcType="VARCHAR" />
+        <result column="version" property="version" jdbcType="INTEGER" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="dict_type_name" property="dictTypeName" jdbcType="VARCHAR" />
+        <result column="parent_name" property="parentName" jdbcType="VARCHAR" />
+        <result column="public_type_name" property="publicTypeName" jdbcType="VARCHAR" />
+    </resultMap>
+    <!--查询字典列表-->
+    <select id="listDictionaryByPage" resultMap="BaseResultMap">
+        select
+            a.dict_value,
+            a.dict_name,
+            case a.dict_type
+            when 0 then
+            '员工标签'
+            when 1 then
+            '项目标签'
+            when 2 then
+            '标签分类'
+            when 3 then
+            '项目角色'
+            when 4 then
+            '一级活动类型'
+            when 5 then
+            '二级活动类型'
+            when 6 then
+            '评审类型'
+            when 7 then
+            '测试轮次'
+            when 8 then
+            '项目版本'
+            when 9 then
+            '项目角色按钮'
+            end as dict_type_name,
+            a.dict_type,
+            a.parent_code,
+            c.dict_name as parent_name,
+            a.public_type,
+            case a.public_type
+            when 1 then
+            '第一轮'
+            when 2 then
+            '第二轮'
+            when 3 then
+            '第三轮'
+            when 4 then
+            '第四轮'
+            when 5 then
+            '第五轮'
+            when 6 then
+            'PSM'
+            when 7 then
+            'QA'
+            when 8 then
+            'CML'
+            when 9 then
+            'TL'
+            when 10 then
+            '开发人员'
+            when 11 then
+            '测试人员'
+            end as public_type_name,
+            a.remark,
+            a.is_deleted,
+            a.id,
+            a.sort_no,
+            a.gmt_create,
+            a.create_by,
+            a.gmt_modified,
+            a.last_modified_by,
+            a.version,
+            b.user_name
+        from
+        t_dictionary a left join t_sys_user b on b.user_code=a.create_by
+        and 	b.is_deleted = 0
+        left join t_dictionary c on c.dict_value = a.parent_code
+        and 	c.is_deleted = 0
+        where
+        a.is_deleted = 0
+        <if test="dictValue != null and dictValue != ''">
+            and a.dict_value like concat('%', #{dictValue}, '%')
+        </if>
+        <if test="dictName != null and dictName != ''">
+            and a.dict_name like concat('%', #{dictName}, '%')
+        </if>
+        <if test="dictType != null and dictType != ''">
+            and a.dict_type = #{dictType}
+        </if>
+        <if test="userName != null and userName != ''">
+            and b.user_name like concat('%', #{userName}, '%')
+        </if>
+        order by a.dict_type asc,a.gmt_create desc
+    </select>
+
+    <!--查询父级列表-->
+    <select id="listDictionaryFatherByPage" resultMap="BaseResultMap">
+        select
+        a.dict_value,
+        a.dict_type,
+        b.dict_name as parent_name,
+        b.dict_value as parent_code,
+        a.dict_name
+        from
+        t_dictionary a left join t_dictionary b on b.dict_value = a.parent_code
+        and 	b.is_deleted = 0
+        where
+        a.is_deleted = 0
+        and a.dict_type = #{dictType}
+        <if test="dictValue != null and dictValue != ''">
+            and a.parent_code = #{dictValue}
+        </if>
+        <if test="dictName != null and dictName != ''">
+            and a.dict_name like concat('%', #{dictName}, '%')
+        </if>
+        order by a.gmt_create desc
+    </select>
+    <!--查询字典详情-->
+    <select id="getDictionary" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        a.dict_value,
+        a.dict_name,
+        case a.dict_type
+        when 0 then
+        '员工标签'
+        when 1 then
+        '项目标签'
+        when 2 then
+        '标签分类'
+        when 3 then
+        '项目角色'
+        when 4 then
+        '一级活动类型'
+        when 5 then
+        '二级活动类型'
+        when 6 then
+        '评审类型'
+        when 7 then
+        '测试轮次'
+        when 8 then
+        '项目版本'
+        when 9 then
+        '项目角色按钮'
+        end as dict_type_name,
+        a.dict_type,
+        a.parent_code,
+        c.dict_name as parent_name,
+        a.public_type,
+        case a.public_type
+        when 1 then
+        '第一轮'
+        when 2 then
+        '第二轮'
+        when 3 then
+        '第三轮'
+        when 4 then
+        '第四轮'
+        when 5 then
+        '第五轮'
+        when 6 then
+        'PSM'
+        when 7 then
+        'QA'
+        when 8 then
+        'CML'
+        when 9 then
+        'TL'
+        when 10 then
+        '开发人员'
+        when 11 then
+        '测试人员'
+        end as public_type_name,
+        a.remark,
+        a.is_deleted,
+        a.id,
+        a.sort_no,
+        a.gmt_create,
+        a.create_by,
+        a.gmt_modified,
+        a.last_modified_by,
+        a.version,
+        b.user_name
+        from
+        t_dictionary a left join t_sys_user b on b.user_code=a.create_by
+        and 	b.is_deleted = 0
+        left join t_dictionary c on c.dict_value = a.parent_code
+        and 	c.is_deleted = 0
+        where
+        a.is_deleted = 0
+        and a.id = #{id}
+    </select>
+    <!--新增字典-->
+    <insert id="saveDictionary" parameterType="com.xzsd.pc.dictionary.entity.DictionaryDO" >
+        insert into t_dictionary (
+            dict_value,
+            dict_name,
+            dict_type,
+            parent_code,
+            public_type,
+            remark,
+            is_deleted,
+            id,
+            sort_no,
+            gmt_create,
+            create_by,
+            gmt_modified,
+            last_modified_by,
+            version
+          )
+        values (
+          #{dictValue,jdbcType=VARCHAR},
+          #{dictName,jdbcType=VARCHAR},
+          #{dictType,jdbcType=VARCHAR},
+          #{parentCode,jdbcType=VARCHAR},
+          #{publicType,jdbcType=INTEGER},
+          #{remark,jdbcType=VARCHAR},
+          0,
+          #{id,jdbcType=VARCHAR},
+          0,
+          now(),
+          #{createBy,jdbcType=VARCHAR},
+          now(),
+          #{lastModifiedBy,jdbcType=VARCHAR},
+          0
+          )
+    </insert>
+    <!--修改字典-->
+    <update id="updateDictionary" parameterType="com.xzsd.pc.dictionary.entity.DictionaryDO">
+        update
+          t_dictionary
+        set
+          dict_name=#{dictName,jdbcType=VARCHAR},
+          dict_type=#{dictType,jdbcType=VARCHAR},
+          parent_code=#{parentCode,jdbcType=VARCHAR},
+          public_type=#{publicType,jdbcType=INTEGER},
+          remark = #{remark,jdbcType=VARCHAR},
+          gmt_modified = now(),
+          last_modified_by = #{lastModifiedBy,jdbcType=VARCHAR},
+          version = version + 1
+        where
+          id = #{id}
+    </update>
+
+    <!--校验字典名称是否存在-->
+    <select id="countDictionaryName" parameterType="com.xzsd.pc.dictionary.entity.DictionaryDO" resultType="int">
+        select count(1)
+        from t_dictionary
+        where is_deleted = 0
+        and dict_name = #{dictName}
+        and dict_type = #{dictType}
+        <if test="dictValue != null and dictValue != ''">
+            and dict_value != #{dictValue}
+        </if>
+    </select>
+
+
+</mapper>

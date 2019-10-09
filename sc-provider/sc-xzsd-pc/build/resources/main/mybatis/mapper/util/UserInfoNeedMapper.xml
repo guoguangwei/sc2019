@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.util.dao.UserInfoNeedDao">
+
+    <!-- 统计当前用户的管理员角色数目 -->
+    <select id="countAdminRole" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select count(1) from t_sys_user_role where user_code = #{user_code} and is_deleted = 0 and role_code = '0e95dda666354d968c21d59416bf44c1'
+    </select>
+
+    <select id="getUserType" parameterType="java.lang.String"
+            resultType="java.lang.String">
+        select
+        is_admin
+        from t_sys_user
+        where is_deleted = 0
+        AND user_code = #{userCode}
+    </select>
+
+</mapper>

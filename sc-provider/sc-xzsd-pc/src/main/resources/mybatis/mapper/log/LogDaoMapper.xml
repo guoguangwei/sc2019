@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.log.dao.LogDao">
+
+    <select id="listLogByPage" parameterType="com.xzsd.pc.log.entity.LogDTO"
+            resultType="com.xzsd.pc.log.entity.LogVO">
+        select
+        id,
+        user_no,
+        ip,
+        fun_param,
+        fun_desc,
+        fun_name,
+        op_type,
+        detail,
+        is_deleted,
+        sort_no,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by,
+        version,
+        status,
+        order_no,
+        role
+        from t_operation_log
+        where is_deleted = 0
+        <if test="funName != null and  funName  != ''">
+            and fun_name like CONCAT('%',#{funName},'%')
+        </if>
+        <if test="ip != null and  ip  != ''">
+            and ip like CONCAT('%',#{ip},'%')
+        </if>
+        <if test="opType != null and  opType  != ''">
+            and op_type like CONCAT('%',#{opType},'%')
+        </if>
+        <if test="userNo != null and  userNo  != ''">
+            and user_no like CONCAT('%',#{userNo},'%')
+        </if>
+        <if test="role != null and  role  != ''">
+            and role = #{role}
+        </if>
+        order by gmt_create desc
+      </select>
+
+
+    <insert id="insertLog" parameterType="com.xzsd.pc.log.entity.ActionDto" >
+        insert into t_operation_log
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            <if test="userNo != null" >
+                user_no,
+            </if>
+            <if test="ip != null" >
+                ip,
+            </if>
+            <if test="funDesc != null" >
+                fun_desc,
+            </if>
+            <if test="funName != null" >
+                fun_name,
+            </if>
+            <if test="opType != null" >
+                op_type,
+            </if>
+            is_deleted,
+            sort_no,
+            gmt_create,
+            create_by,
+            version,
+            status,
+            <if test="orderNo != null" >
+                order_no,
+            </if>
+            <if test="role != null" >
+                role,
+            </if>
+            <if test="funParam != null" >
+                fun_param,
+            </if>
+            <if test="detail != null" >
+                detail,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            #{id,jdbcType=VARCHAR},
+            <if test="userNo != null" >
+                #{userNo,jdbcType=VARCHAR},
+            </if>
+            <if test="ip != null" >
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="funDesc != null" >
+                #{funDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="funName != null" >
+                #{funName,jdbcType=VARCHAR},
+            </if>
+            <if test="opType != null" >
+                #{opType,jdbcType=INTEGER},
+            </if>
+            0,
+            1,
+            NOW(),
+            #{createBy,jdbcType=VARCHAR},
+            1,
+            <if test="status != null" >
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="orderNo != null" >
+                #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="role != null" >
+                #{role,jdbcType=VARCHAR},
+            </if>
+            <if test="funParam != null" >
+                #{funParam,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="detail != null" >
+                #{detail,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+</mapper>
