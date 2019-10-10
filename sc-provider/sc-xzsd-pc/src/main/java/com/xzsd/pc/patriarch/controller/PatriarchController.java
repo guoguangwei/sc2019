@@ -10,7 +10,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +43,8 @@ public class PatriarchController {
      * @Date: 2019/5/17 17:16
      */
     @ApiOperation(value="查询家长信息",notes = "查询的条件")
+    //@ApiOperation接口文档注解,它不是spring自带的注解是swagger里的
+    //@ApiOperation(value = “接口说明”, httpMethod = “接口请求方式”, response = “接口返回参数类型”, notes = “接口发布说明”)
     @RequestMapping(value="/listPatriarchInfo", method= RequestMethod.POST)
     public AppResponse listPatriarchInfo(@RequestParam Map<String, Object> map) {
         String userCode = SecurityUtils.getCurrentUserId();

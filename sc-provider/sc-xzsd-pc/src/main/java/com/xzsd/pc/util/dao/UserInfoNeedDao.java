@@ -1,6 +1,7 @@
 package com.xzsd.pc.util.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import java.util.Map;
  * @Description:
  */
 @Mapper
+@Component
 public interface UserInfoNeedDao {
 
    /**

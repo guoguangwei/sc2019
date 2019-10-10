@@ -1,7 +1,7 @@
 package com.xzsd.pc.patriarch.dao;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.Map;
  * @Description:
  */
 @Mapper
+@Component
 public interface PatriarchDao {
 
     /**
