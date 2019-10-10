@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.tDriverInfo.dao.DriverDao">
+
+    <!-- 查询司机信息 -->
+    <select id="findAllDriver" resultType="java.util.Map">
+        SELECT t.id, t.driver_no,
+            t.driver_name,
+            t.driver_phone,
+            REPLACE(identity_card, SUBSTR(identity_card,4,12), '************') AS identity_card,
+            u.user_acct
+            FROM t_driver_info AS t
+            LEFT JOIN t_sys_user AS u
+            ON t.user_code = u.user_code
+            WHERE t.is_deleted AND u.is_deleted = 0
+    </select>
+
+    <!-- 查询司机账号是否存在 -->
+    <select id="haveAccount" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+        SELECT count(su.user_code) AS num
+            FROM t_sys_user AS su
+            WHERE su.user_acct = #{ userAcct }
+            OR su.phone = #{ phone }
+    </select>
+    
+    <select id="driverNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+        SELECT count(t.id)
+            FROM t_driver_info AS t
+            WHERE province_no = #{ provinceNo }
+            AND county_no = #{ countyNo }
+    </select>
+
+    <!-- 添加司机信息 -->
+    <insert id="addDriver" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+
+    </insert>
+
+
+</mapper>
