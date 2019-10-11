@@ -1,5 +1,7 @@
 package com.xzsd.pc.tDriverInfo.entity;
 
+import java.util.Date;
+
 public class Driver {
 
     private String driverNo;
@@ -10,15 +12,17 @@ public class Driver {
     private int isDeleted;
     private String id;
     private String sortNo;
-    private String gmtCreate;
+    private Date gmtCreate;
     private String createBy;
-    private String gmtModified;
+    private Date gmtModified;
     private String lastModifiedBy;
     private String version;
     private String provinceNo;
     private String province;
     private String county;
     private String countyNo;
+    private String userAcct;
+    private String userPwd;
 
     public String getDriverNo() {
         return driverNo;
@@ -84,11 +88,11 @@ public class Driver {
         this.sortNo = sortNo;
     }
 
-    public String getGmtCreate() {
+    public Date getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(String gmtCreate) {
+    public void setGmtCreate(Date gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
@@ -100,11 +104,11 @@ public class Driver {
         this.createBy = createBy;
     }
 
-    public String getGmtModified() {
+    public Date getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(String gmtModified) {
+    public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -154,5 +158,21 @@ public class Driver {
 
     public void setCountyNo(String countyNo) {
         this.countyNo = countyNo;
+    }
+
+    public String getUserAcct() {
+        return userAcct;
+    }
+
+    public void setUserAcct(String userAcct) {
+        this.userAcct = userAcct;
+    }
+
+    public String getUserPwd() {
+        return userPwd;
+    }
+
+    public void setUserPwd(String userPwd) {
+        this.userPwd = userPwd;
     }
 }

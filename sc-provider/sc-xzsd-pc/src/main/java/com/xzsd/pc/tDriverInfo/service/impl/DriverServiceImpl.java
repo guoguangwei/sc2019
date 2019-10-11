@@ -6,9 +6,11 @@ import com.neusoft.core.page.Page;
 import com.neusoft.core.restful.AppResponse;
 import com.neusoft.util.StringUtil;
 import com.neusoft.util.UUIDUtils;
+import com.neusoft.webauth.utils.PasswordUtils;
 import com.xzsd.pc.tDriverInfo.dao.DriverDao;
 import com.xzsd.pc.tDriverInfo.entity.Driver;
 import com.xzsd.pc.tDriverInfo.entity.User;
+import com.xzsd.pc.tDriverInfo.entity.UserRole;
 import com.xzsd.pc.tDriverInfo.service.DriverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,13 +79,14 @@ public class DriverServiceImpl implements DriverService {
      * @deprecated: 添加司机信息
      * @Data: 2019/10/10
      */
-    public AppResponse additionDriver(Map<String, Object> addMap, Driver driver, User user) {
+    @Transactional(rollbackFor = Exception.class)
+    public AppResponse additionDriver(Driver driver, User user, UserRole userRole) {
 
         try {
 
             //验证账号是否已存在，
             int account = driverDao.haveAccount(user);
-            if ( 0 != account) {
+            if ( 0 != account ) {
                 return AppResponse.bizError("该账号名已存在，请重新输入！");
             }
             //手动设置id的值，随机生成
@@ -93,17 +96,44 @@ public class DriverServiceImpl implements DriverService {
             //查询同一城市的司机总数
             int amount = driverDao.driverNumber(driver);
             //手动设置driver_no的值
-            driver.setDriverNo("D" + driver.getProvinceNo() + driver.getCountyNo() + (amount + 1));
+            driver.setDriverNo("D" + driver.getProvinceNo()
+                    + driver.getCountyNo() + (amount + 1));
             //添加司机信息
-            driverDao.addDriver(driver);
+            int addDriverNumber = driverDao.addDriver(driver);
+            System.out.println(addDriverNumber);
 
-            //
+            //新增司机用户
+            //随机生成id
+            user.setId(UUIDUtils.getUUID());
+            //将密码进行加密
+            String pwd = PasswordUtils.generatePassword(driver.getUserPwd());
+            System.out.println(pwd);
+            driver.setUserPwd(pwd);
+            int addDriverAcc = driverDao.addDriverAccount(driver);
+            System.out.println(addDriverAcc);
 
-            return AppResponse.success("添加成功！");
+            //新增司机角色
+            userRole.setId(UUIDUtils.getUUID());
+            userRole.setUserCode(driver.getUserCode());
+            //查询账户角色是否已有默认角色
+            if (driverDao.userRole(userRole) > 0) {
+                userRole.setIsDefault(0);
+            }else {
+                userRole.setIsDefault(1);
+            }
+
+            int addUserRo = driverDao.addUserRole(userRole);
+            System.out.println(addUserRo);
+
+            if(addDriverNumber > 0 && addDriverAcc > 0 && addUserRo > 0) {
+                return AppResponse.success("添加司机信息成功！");
+            }else {
+                return AppResponse.serverError("添加失败司机信息，请联系管理员！");
+            }
 
         }catch (Exception e) {
             logger.info(e.getMessage());
-    //      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return AppResponse.bizError("添加司机失败！");
         }
     }

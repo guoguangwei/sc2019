@@ -2,6 +2,7 @@ package com.xzsd.pc.tDriverInfo.dao;
 
 import com.xzsd.pc.tDriverInfo.entity.Driver;
 import com.xzsd.pc.tDriverInfo.entity.User;
+import com.xzsd.pc.tDriverInfo.entity.UserRole;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -37,8 +38,32 @@ public interface DriverDao {
      * @Author: guo
      * @deprecated: 添加司机信息
      * @Data: 2019/10/10
+     * @return
      */
-    void addDriver(Driver driver);
+    int addDriver(Driver driver);
 
 
+    /**
+     * @Author: guo
+     * @deprecated: 添加司机账户
+     * @Data: 2019/10/11
+     * @return: int
+     */
+    int addDriverAccount(Driver driver);
+
+    /**
+     * @Author: guo
+     * @deprecated: 查询账户角色是否为默认角色
+     * @Data: 2019/10/11
+     * @return: int
+     */
+    int userRole(UserRole userRole);
+
+    /**
+     * @Author: guo
+     * @deprecated: 添加用户角色
+     * @Data: 2019/10/11
+     * @return: int
+     */
+    int addUserRole(UserRole userRole);
 }

@@ -3,6 +3,7 @@ package com.xzsd.pc.tDriverInfo.controller;
 import com.neusoft.core.restful.AppResponse;
 import com.xzsd.pc.tDriverInfo.entity.Driver;
 import com.xzsd.pc.tDriverInfo.entity.User;
+import com.xzsd.pc.tDriverInfo.entity.UserRole;
 import com.xzsd.pc.tDriverInfo.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -44,8 +45,8 @@ public class DriverController {
      * @data: 2019/10/10
      */
     @RequestMapping(value = "addDriver", method = RequestMethod.POST)
-    public AppResponse additionDriver(@RequestParam Map<String, Object> addMap, Driver driver, User user) {
+    public AppResponse additionDriver(Driver driver, User user, UserRole userRole) {
 
-        return driverService.additionDriver(addMap, driver, user);
+        return driverService.additionDriver(driver, user, userRole);
     }
 }
