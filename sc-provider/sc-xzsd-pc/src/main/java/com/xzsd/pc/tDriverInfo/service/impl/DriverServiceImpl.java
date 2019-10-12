@@ -109,6 +109,7 @@ public class DriverServiceImpl implements DriverService {
             String pwd = PasswordUtils.generatePassword(driver.getUserPwd());
             System.out.println(pwd);
             driver.setUserPwd(pwd);
+
             int addDriverAcc = driverDao.addDriverAccount(driver);
             System.out.println(addDriverAcc);
 

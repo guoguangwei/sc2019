@@ -31,7 +31,7 @@
     </select>
 
     <!-- 查询当前城市所拥有的司机数 -->
-    <select id="driverNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+    <select id="driverNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.Driver">
         SELECT count(t.id)
             FROM t_driver_info AS t
             WHERE province_no = #{ provinceNo }
@@ -58,7 +58,7 @@
             #{provinceNo},
             #{province},
             #{county},
-             #{countyNo} )
+            #{countyNo} )
     </insert>
 
     <!-- 添加司机账户 -->

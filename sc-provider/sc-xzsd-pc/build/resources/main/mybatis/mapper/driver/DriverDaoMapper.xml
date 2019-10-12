@@ -3,15 +3,6 @@
 <mapper namespace="com.xzsd.pc.tDriverInfo.dao.DriverDao">
 
     <!-- 查询司机信息 -->
-    <select id="findDriverInfo" resultType="com.xzsd.pc.tDriverInfo.entity.Driver">
---         SELECT t.id, t.driver_no, t.driver_name, t.driver_phone,
---             REPLACE(identity_card, SUBSTR(identity_card,4,12), '************')
---             AS identity_card, u.user_acct FROM t_driver_info AS t
---             LEFT JOIN t_sys_user AS u ON t.user_code = u.user_code
---             WHERE t.is_deleted AND u.is_deleted = 0
-    </select>
-
-    <!-- 查询司机信息 -->
     <select id="findAllDriver" resultType="java.util.Map">
         SELECT t.id, t.driver_no,
             t.driver_name,
@@ -21,7 +12,13 @@
             FROM t_driver_info AS t
             LEFT JOIN t_sys_user AS u
             ON t.user_code = u.user_code
-            WHERE t.is_deleted AND u.is_deleted = 0
+            WHERE 
+            <where>
+                t.is_deleted = 0 AND u.is_deleted = 0
+                <if test="driverName != null and driverName != ''">
+                    AND driverName like CONCAT('%',#{driverName},'%')
+                </if>
+            </where>
     </select>
 
     <!-- 查询司机账号是否存在 -->
@@ -30,9 +27,11 @@
             FROM t_sys_user AS su
             WHERE su.user_acct = #{ userAcct }
             OR su.phone = #{ phone }
+            and su.is_deleted = 0
     </select>
-    
-    <select id="driverNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+
+    <!-- 查询当前城市所拥有的司机数 -->
+    <select id="driverNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.Driver">
         SELECT count(t.id)
             FROM t_driver_info AS t
             WHERE province_no = #{ provinceNo }
@@ -40,8 +39,97 @@
     </select>
 
     <!-- 添加司机信息 -->
-    <insert id="addDriver" parameterType="com.xzsd.pc.tDriverInfo.entity.User">
+    <insert id="addDriver" parameterType="com.xzsd.pc.tDriverInfo.entity.Driver">
+        INSERT INTO
+            t_driver_info
+            VALUES ( #{driverNo},
+            #{driverName},
+            #{driverPhone},
+            #{identityCard},
+             #{userCode},
+            0,
+            #{id},
+            0,
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+             0,
+            #{provinceNo},
+            #{province},
+            #{county},
+            #{countyNo} )
+    </insert>
 
+    <!-- 添加司机账户 -->
+    <insert id="addDriverAccount" parameterType="com.xzsd.pc.tDriverInfo.entity.Driver">
+        INSERT INTO
+            t_sys_user(user_code,
+            user_name,
+            user_acct,user_pwd,
+            is_admin,
+            is_deleted,
+            id,
+            sort_no,
+            id_card,
+            phone,
+            gmt_create,
+            create_by,
+            gmt_modified,
+            last_modified_by,
+            version)
+            VALUES(#{userCode},
+            #{driverName},
+            #{userAcct},
+            #{userPwd},
+            0,
+            0,
+            #{id},
+            0,
+            #{identityCard},
+            #{driverPhone},
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+            0)
+    </insert>
+
+    <!-- 查询账户角色是否已有默认角色 -->
+    <select id="userRole" resultType="java.lang.Integer" parameterType="com.xzsd.pc.tDriverInfo.entity.UserRole">
+        select count(role_code) AS num
+            from t_sys_user_role
+            where user_code = #{ userCode }
+            and is_deleted = 0
+            and is_default = '1';
+    </select>
+
+    <!-- 添加用户角色 -->
+    <insert id="addUserRole" parameterType="com.xzsd.pc.tDriverInfo.entity.UserRole">
+        insert into t_sys_user_role
+        (user_code,
+        role_code,
+        is_default,
+        id,
+        sort_no,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by,
+        is_deleted,
+        version)
+        values
+        (#{userCode},
+            '3',
+            #{isDefault},
+            #{id},
+            0,
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+            0,
+            0)
     </insert>
 
 
