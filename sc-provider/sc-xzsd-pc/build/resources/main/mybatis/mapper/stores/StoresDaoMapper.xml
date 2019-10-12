@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.storesInfo.dao.StoresDao">
+
+    <!-- 回显province -->
+    <select id="findProvince" resultType="java.util.Map">
+        SELECT
+        t_code_province.province_code AS code,
+        t_code_province.province_name AS province
+        FROM t_code_province
+        WHERE t_code_province.is_deleted = 0
+    </select>
+
+    <!-- 回显County -->
+    <select id="findCounty" resultType="java.util.Map">
+        SELECT
+            t_code_county.county_code AS code,
+            t_code_county.county_name AS county
+            FROM t_code_county
+            WHERE t_code_county.is_deleted = 0
+            AND t_code_county.province_code = #{provinceCode}
+    </select>
+
+    <!-- 查询门店信息 -->
+    <select id="findAllStoreInfo" resultType="java.util.Map">
+        SELECT
+            sto.store_no,
+            sto.store_name,
+            sto.store_phone,
+            sto.store_address,
+            sto.wanjia_account,
+            su.user_name,
+            sto.business_license,
+            su.user_acct
+            FROM t_store_info AS sto
+            LEFT JOIN t_sys_user AS su
+            ON sto.user_code = su.user_code
+            WHERE sto.is_deleted = 0
+            AND su.is_deleted = 0
+            <if test="storeNo != null and storeNo != ''">
+                AND store_no = #{storeNo}
+            </if>
+            <if test="storeName != null and storeName != ''">
+                AND store_name = #{storeName}
+            </if>
+            <if test="province != null and province != ''">
+                AND province = #{province}
+            </if>
+            <if test="county != null and county != ''">
+                AND county = #{county}
+            </if>
+            <if test="county != null and county != ''">
+                AND county = #{county}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name = #{userName}
+            </if>
+    </select>
+
+    <!-- 查询门店账号是否存在 -->
+    <select id="haveAccount" resultType="java.lang.Integer" parameterType="com.xzsd.pc.storesInfo.entity.User">
+        SELECT count(su.user_code) AS num
+            FROM t_sys_user AS su
+            WHERE su.user_acct = #{ userAcct }
+            OR su.phone = #{ phone }
+            and su.is_deleted = 0
+    </select>
+
+    <!-- 查询当前城市所拥有的门店数 -->
+    <select id="storeNumber" resultType="java.lang.Integer" parameterType="com.xzsd.pc.storesInfo.entity.Store">
+        SELECT count(ts.id)
+            FROM t_store_info AS ts
+            WHERE province_no = #{ provinceNo }
+            AND county_no = #{ countyNo }
+    </select>
+
+    <!-- 添加门店信息 -->
+    <insert id="addStore" parameterType="com.xzsd.pc.storesInfo.entity.Store">
+        INSERT INTO
+            t_store_info
+            VALUES ( #{storeNo},
+            #{storeName},
+            #{storeAddress},
+            #{storePhone},
+            #{userCode},
+            #{wanjiaAccount},
+            0,
+            #{id},
+            0,
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+            0,
+            #{province},
+            #{provinceNo},
+            #{county},
+            #{countyNo},
+            #{starLevel},
+            #{businessLicense},
+            #{identityCard})
+    </insert>
+
+    <!-- 添加门店账户 -->
+    <insert id="addStoreAccount" parameterType="com.xzsd.pc.storesInfo.entity.Store">
+        INSERT INTO
+            t_sys_user(user_code,
+            user_name,
+            user_acct,
+            user_pwd,
+            is_admin,
+            is_deleted,
+            id,
+            sort_no,
+            id_card,
+            phone,
+            gmt_create,
+            create_by,
+            gmt_modified,
+            last_modified_by,
+            version)
+            VALUES(#{userCode},
+            #{userName},
+            #{userAcct},
+            #{userPwd},
+            0,
+            0,
+            #{id},
+            0,
+            #{identityCard},
+            #{storePhone},
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+            0)
+    </insert>
+
+    <!-- 查询账户角色是否已有默认角色 -->
+    <select id="userRole" resultType="java.lang.Integer" parameterType="com.xzsd.pc.storesInfo.entity.UserRole">
+        select count(role_code) AS num
+            from t_sys_user_role
+            where user_code = #{ userCode }
+            and is_deleted = 0
+            and is_default = '1';
+    </select>
+
+    <!-- 添加用户角色 -->
+    <insert id="addUserRole" parameterType="com.xzsd.pc.storesInfo.entity.UserRole">
+        insert into t_sys_user_role
+        (user_code,
+        role_code,
+        is_default,
+        id,
+        sort_no,
+        gmt_create,
+        create_by,
+        gmt_modified,
+        last_modified_by,
+        is_deleted,
+        version)
+        values
+        (#{userCode},
+            '3',
+            #{isDefault},
+            #{id},
+            0,
+            NOW(),
+            #{createBy},
+            NOW(),
+            #{lastModifiedBy},
+            0,
+            0)
+    </insert>
+
+
+
+    <!-- 回显province -->
+    <select id="findProvinces" resultType="java.util.Map">
+        SELECT
+        t_code_province.province_code AS code,
+        t_code_province.province_name AS province
+        FROM t_code_province
+        WHERE t_code_province.is_deleted = 0
+    </select>
+
+    <!-- 回显County -->
+    <select id="findCountys" resultType="java.util.Map">
+        SELECT
+            t_code_county.county_code AS code,
+            t_code_county.county_name AS county
+            FROM t_code_county
+            WHERE t_code_county.is_deleted = 0
+            AND t_code_county.province_code = #{provinceCode}
+    </select>
+
+</mapper>
