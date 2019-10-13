@@ -1,7 +1,10 @@
 package com.xzsd.pc.storesInfo.service;
 
 import com.neusoft.core.restful.AppResponse;
-import com.xzsd.pc.storesInfo.entity.*;
+import com.xzsd.pc.storesInfo.entity.County;
+import com.xzsd.pc.storesInfo.entity.Province;
+import com.xzsd.pc.storesInfo.entity.Store;
+import com.xzsd.pc.storesInfo.entity.UserRole;
 
 import java.util.Map;
 
@@ -19,21 +22,40 @@ public interface StoresService {
      * @deprecated: 添加门店信息
      * @Date: 2019/10/12
      */
-    AppResponse additionStore(Store store, User user, UserRole userRole);
+    AppResponse additionStore(Store store, UserRole userRole);
 
     /**
      * @author: guo
      * @deprecated: 回显province信息
      * @Date: 2019/10/12
      */
-    Map<String, Object> findProvince(Province province);
+    AppResponse findProvince(Province province);
 
     /**
      * @author: guo
      * @deprecated: 回显county信息
      * @Date: 2019/10/12
      */
-    Map<String, Object> findCounty(County county);
+    AppResponse findCounty(County county);
 
+    /**
+     * @author: guo
+     * @deprecated: 回显省份和城市的列表信息
+     * @Date: 2019/10/12
+     */
     AppResponse findProvinceCounty(Province province, County county);
+
+    /**
+     * @author: guo
+     * @deprecated: 修改门店信息
+     * @Date: 2019/10/13
+     */
+    AppResponse updateStore(Store store);
+
+    /**
+     * @author: guo
+     * @deprecated: 获取修改门店信息
+     * @Date: 2019/10/13
+     */
+    AppResponse findStoreById(String id);
 }

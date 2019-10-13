@@ -1,6 +1,9 @@
 package com.xzsd.pc.storesInfo.dao;
 
-import com.xzsd.pc.storesInfo.entity.*;
+import com.xzsd.pc.storesInfo.entity.County;
+import com.xzsd.pc.storesInfo.entity.Province;
+import com.xzsd.pc.storesInfo.entity.Store;
+import com.xzsd.pc.storesInfo.entity.UserRole;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +21,13 @@ public interface StoresDao {
      */
     List findAllStoreInfo(Map<String, Object> retMap);
 
+    /*=================================添加门店信息部分===================================*/
     /**
      * @author: guo
      * @deprecated: 查询门店账号是否存在
      * @Date: 2019/10/12
      */
-    int haveAccount(User user);
+    int haveAccount(Store store);
 
     /**
      * @author: guo
@@ -75,17 +79,39 @@ public interface StoresDao {
     List<County> findCounty(County county);
 
     /**
-     * ===========================================
+     * ============
      * @author: guo
-     * @deprecated: 回显province
+     * @deprecated: 回显province,省份城市在同一个方法中查询
      * @Date: 2019/10/12
      */
     List<Province> findProvinces(Province province);
 
     /**
      * @author: guo
-     * @deprecated: 回显county
+     * @deprecated: 回显county,省份城市在同一个方法中查询
      * @Date: 2019/10/12
      */
     List<Province> findCountys(County county);
+
+    /*=================================编辑门店信息部分===================================*/
+    /**
+     * @author: guo
+     * @deprecated: 获取修改门店信息
+     * @Date: 2019/10/13
+     */
+    Store findStoreById(String id);
+
+    /**
+     * @author: guo
+     * @deprecated: 修改门店信息
+     * @Date: 2019/10/13
+     */
+    int updateStoreInfo(Store store);
+
+    /**
+     * @author: guo
+     * @deprecated: 修改账号信息
+     * @Date: 2019/10/13
+     */
+    int updateStoreAccount(Store store);
 }

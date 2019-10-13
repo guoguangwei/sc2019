@@ -1,7 +1,10 @@
 package com.xzsd.pc.storesInfo.controller;
 
 import com.neusoft.core.restful.AppResponse;
-import com.xzsd.pc.storesInfo.entity.*;
+import com.xzsd.pc.storesInfo.entity.County;
+import com.xzsd.pc.storesInfo.entity.Province;
+import com.xzsd.pc.storesInfo.entity.Store;
+import com.xzsd.pc.storesInfo.entity.UserRole;
 import com.xzsd.pc.storesInfo.service.StoresService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +55,7 @@ public class StoresController {
      * @Date: 2019/10/12
      */
     @RequestMapping(value = "findProvince", method = RequestMethod.POST)
-    public Map<String, Object> findProvince(Province province) {
+    public AppResponse findProvince(Province province) {
 
         return storesService.findProvince(province);
     }
@@ -63,7 +66,7 @@ public class StoresController {
      * @Date: 2019/10/12
      */
     @RequestMapping(value = "findCounty", method = RequestMethod.POST)
-    public Map<String, Object> findCounty(County county) {
+    public AppResponse findCounty(County county) {
 
         return storesService.findCounty(county);
     }
@@ -74,8 +77,31 @@ public class StoresController {
      * @Date: 2019/10/12
      */
     @RequestMapping(value = "addStoreInfo", method = RequestMethod.POST)
-    public AppResponse additionStore(Store store, User user, UserRole userRole) {
+    public AppResponse additionStore(Store store, UserRole userRole) {
 
-        return storesService.additionStore(store, user, userRole);
+        return storesService.additionStore(store, userRole);
     }
+
+    /**
+     * @author: guo
+     * @deprecated: 获取修改门店信息
+     * @Date: 2019/10/13
+     */
+    @RequestMapping(value = "findStoreById")
+    public AppResponse findStoreById(@RequestParam(value = "id") String id) {
+
+        return storesService.findStoreById(id);
+    }
+
+    /**
+     * @author: guo
+     * @deprecated: 修改门店信息
+     * @Date: 2019/10/13
+     */
+    @RequestMapping(value = "updateStore", method = RequestMethod.POST)
+    public AppResponse updateStore(Store store) {
+
+        return storesService.updateStore(store);
+    }
+
 }

@@ -8,7 +8,10 @@ import com.neusoft.util.StringUtil;
 import com.neusoft.util.UUIDUtils;
 import com.neusoft.webauth.utils.PasswordUtils;
 import com.xzsd.pc.storesInfo.dao.StoresDao;
-import com.xzsd.pc.storesInfo.entity.*;
+import com.xzsd.pc.storesInfo.entity.County;
+import com.xzsd.pc.storesInfo.entity.Province;
+import com.xzsd.pc.storesInfo.entity.Store;
+import com.xzsd.pc.storesInfo.entity.UserRole;
 import com.xzsd.pc.storesInfo.service.StoresService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,32 +80,23 @@ public class StoresServiceImpl implements StoresService {
 
     /**
      * @author: guo
-     * @deprecated: 回显省份和城市的列表信息
-     * @Date: 2019/10/12
-     */
-
-
-
-    /**
-     * @author: guo
      * @deprecated: 回显province信息
      * @Date: 2019/10/12
      */
     @Override
-    public Map<String, Object> findProvince(Province province) {
+    public AppResponse findProvince(Province province) {
 
-        Map<String, Object> result = new HashMap<String, Object>();
-        List<Province> proList = null;
+        List<Province> proList;
         try {
             proList = storesDao.findProvince(province);
             System.out.println(proList);
 
         }catch (Exception e) {
             logger.info(e.getMessage());
+            return AppResponse.success("省份信息获取失败!");
         }
-        result.put("proList", proList);
 
-        return result;
+        return AppResponse.success("省份信息获取成功!", getPageInfo(proList));
     }
 
     /**
@@ -111,19 +105,18 @@ public class StoresServiceImpl implements StoresService {
      * @Date: 2019/10/12
      */
     @Override
-    public Map<String, Object> findCounty(County county) {
+    public AppResponse findCounty(County county) {
 
-        Map<String, Object> resMap = new HashMap<String, Object>();
-        List<County> couList = null;
+        List<County> couList;
         try {
             couList = storesDao.findCounty(county);
             System.out.println(couList);
         }catch (Exception e) {
             logger.info(e.getMessage());
+            return AppResponse.success("城市、区信息获取失败!");
         }
-        resMap.put("couList", couList);
 
-        return resMap;
+        return AppResponse.success("省份信息获取成功!", getPageInfo(couList));
     }
 
     /**
@@ -134,7 +127,7 @@ public class StoresServiceImpl implements StoresService {
     @Override
     public AppResponse findProvinceCounty(Province province, County county) {
 
-        Map<String, Object> revMap = new HashMap<String, Object>();
+        Map<String, Object> revMap = new HashMap<>();
         List<Province> pList;
         List<Province> cList;
 
@@ -154,18 +147,79 @@ public class StoresServiceImpl implements StoresService {
 
     /**
      * @author: guo
+     * @deprecated: 获取修改门店信息
+     * @Date: 2019/10/13
+     */
+    @Override
+    public AppResponse findStoreById(String id) {
+
+        Store store;
+        try {
+            store = storesDao.findStoreById(id);
+        }catch (Exception e) {
+            logger.info(e.getMessage());
+            return AppResponse.serverError("获取修改门店信息失败！");
+        }
+        return AppResponse.success("获取修改门店信息成功！", getPageInfo(store));
+    }
+
+    /**
+     * @author: guo
+     * @deprecated: 修改门店信息
+     * @Date: 2019/10/13
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AppResponse updateStore(Store store) {
+
+        try {
+            //更新门店信息
+            int updateStore = storesDao.updateStoreInfo(store);
+            System.out.println(updateStore);
+
+            //更新账号信息
+            //将密码进行加密
+            String pwd = PasswordUtils.generatePassword(store.getUserPwd());
+            System.out.println(pwd);
+            store.setUserPwd(pwd);
+            int updateStoreAcc = storesDao.updateStoreAccount(store);
+            System.out.println(updateStoreAcc);
+
+            //验证账号是否已存在，
+            int account = storesDao.haveAccount(store);
+            if ( 0 != account ) {
+                return AppResponse.bizError("该账号名或电话号码已存在，请重新输入！");
+            }
+
+            //判断两个添加方法是否全部成功执行
+            if(updateStore > 0 && updateStoreAcc > 0) {
+                return AppResponse.success("更新门店信息成功！");
+            }else {
+                return AppResponse.serverError("更新门店信息失败，请联系管理员！");
+            }
+
+        }catch (Exception e) {
+            logger.info(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return AppResponse.serverError("更新门店信息失败！");
+        }
+//        return AppResponse.success("更新门店信息成功！");
+    }
+
+    /**
+     * @author: guo
      * @deprecated: 添加门店信息
      * @Date: 2019/10/12
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AppResponse additionStore(Store store, User user, UserRole userRole) {
-        try {
+    public AppResponse additionStore(Store store, UserRole userRole) {
 
+        try {
             //验证账号是否已存在，
-            int account = storesDao.haveAccount(user);
+            int account = storesDao.haveAccount(store);
             if ( 0 != account ) {
-                return AppResponse.bizError("该账号名已存在，请重新输入！");
+                return AppResponse.bizError("该账号名或电话号码已存在，请重新输入！");
             }
             //手动设置id的值，随机生成
             store.setId(UUIDUtils.getUUID());
@@ -182,7 +236,7 @@ public class StoresServiceImpl implements StoresService {
 
             //新增门店用户
             //随机生成id
-            user.setId(UUIDUtils.getUUID());
+            store.setId(UUIDUtils.getUUID());
             //将密码进行加密
             String pwd = PasswordUtils.generatePassword(store.getUserPwd());
             System.out.println(pwd);
@@ -204,6 +258,7 @@ public class StoresServiceImpl implements StoresService {
             int addUserRo = storesDao.addUserRole(userRole);
             System.out.println(addUserRo);
 
+            //判断三个添加方法是否全部成功执行
             if(addStoreNumber > 0 && addStoreAcc > 0 && addUserRo > 0) {
                 return AppResponse.success("添加门店信息成功！");
             }else {
