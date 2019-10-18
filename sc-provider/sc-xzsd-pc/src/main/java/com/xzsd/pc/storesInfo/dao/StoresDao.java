@@ -114,4 +114,34 @@ public interface StoresDao {
      * @Date: 2019/10/13
      */
     int updateStoreAccount(Store store);
+
+    /*=================================删除门店信息部分===================================*/
+
+    /**
+     * @author: guo
+     * @deprecated: 批量删除门店信息
+     * @Date: 2019/10/13
+     */
+    int deleteStoreInfo(Map<String, Object> map);
+
+    /**
+     * @author: guo
+     * @deprecated: 批量删除用户信息
+     * @Date: 2019/10/13
+     */
+    int deleteUserInfo(Map<String, Object> map);
+
+    /**
+     * @author: guo
+     * @deprecated: 批量删除用户信息
+     * @Date: 2019/10/13
+     */
+    int deleteRoleUserInfo(Map<String, Object> map);
+
+    /**
+     * @author: guo
+     * @deprecated: 查询是否还有角色
+     * @Date: 2019/10/13
+     */
+    List<String> listHaveRoleUser(Map<String, Object> map);
 }

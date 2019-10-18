@@ -6,36 +6,39 @@
     <!-- 查询门店信息 -->
     <select id="findAllStoreInfo" resultType="java.util.Map">
         SELECT
+            su.id,
             sto.store_no,
             sto.store_name,
             sto.store_phone,
+            sto.user_code,
+            sto.province,
+            sto.county,
             sto.store_address,
             sto.wanjia_account,
+            sto.identity_card,
             su.user_name,
             sto.business_license,
-            su.user_acct
+            su.user_acct,
+            su.user_pwd
             FROM t_store_info AS sto
             LEFT JOIN t_sys_user AS su
             ON sto.user_code = su.user_code
             WHERE sto.is_deleted = 0
             AND su.is_deleted = 0
             <if test="storeNo != null and storeNo != ''">
-                AND store_no = #{storeNo}
+                AND store_no like concat('%', #{storeNo}, '%')
             </if>
             <if test="storeName != null and storeName != ''">
-                AND store_name = #{storeName}
+                AND store_name like concat('%', #{storeName}, '%')
             </if>
             <if test="province != null and province != ''">
-                AND province = #{province}
+                AND province like concat('%', #{province}, '%')
             </if>
             <if test="county != null and county != ''">
-                AND county = #{county}
-            </if>
-            <if test="county != null and county != ''">
-                AND county = #{county}
+                AND county like concat('%', #{county}, '%')
             </if>
             <if test="userName != null and userName != ''">
-                AND user_name = #{userName}
+                AND user_name like concat('%', #{userName}, '%')
             </if>
     </select>
 
@@ -114,9 +117,9 @@
             #{id},
             0,
             NOW(),
-            #{createBy},
+            #{userCode},
             NOW(),
-            #{lastModifiedBy},
+            #{userCode},
             0,
             #{province},
             #{provinceNo},
@@ -156,9 +159,9 @@
             #{identityCard},
             #{storePhone},
             NOW(),
-            #{createBy},
+            #{userCode},
             NOW(),
-            #{lastModifiedBy},
+            #{userCode},
             0)
     </insert>
 
@@ -192,9 +195,9 @@
             #{id},
             0,
             NOW(),
-            #{createBy},
+            #{userCode},
             NOW(),
-            #{lastModifiedBy},
+            #{userCode},
             0,
             0)
     </insert>
@@ -204,7 +207,7 @@
     <!-- 获取修改门店信息 -->
     <select id="findStoreById" parameterType="com.xzsd.pc.storesInfo.entity.Store" resultType="com.xzsd.pc.storesInfo.entity.Store">
         SELECT
-            si.id,
+            su.id,
             si.user_code,
             si.province_no,
             si.county_no,
@@ -224,7 +227,7 @@
             ON su.user_code = si.user_code
             WHERE si.is_deleted = 0
             AND su.is_deleted = 0
-			AND si.id = #{id};
+			AND su.id = #{id};
     </select>
 
     <!-- 更新门店信息 -->
@@ -245,25 +248,90 @@
             county = #{county},
             county_no = #{countyNo},
             business_license = #{businessLicense},
-            identity_card = #{identityCard}
-            WHERE id = #{id}
+            identity_card = #{identityCard},
+            version = version + 1
+            WHERE user_code = #{userCode}
     </update>
 
     <!-- 更新账号信息 -->
     <update id="updateStoreAccount" parameterType="com.xzsd.pc.storesInfo.entity.Store">
         UPDATE
             t_sys_user
-            SET
+        <set>
+            gmt_create = NOW(),
+            gmt_modified = NOW(),
+            <if test="userName != null and userName != ''">
                 user_name = #{userName},
+            </if>
+            <if test="userAcct != null and userAcct != ''">
                 user_acct = #{userAcct},
+            </if>
+            <if test="userAcct != null and userAcct != ''">
                 user_pwd = #{userPwd},
+            </if>
+            <if test="userAcct != null and userAcct != ''">
                 phone = #{storePhone},
-                gmt_create = NOW(),
-                gmt_modified = NOW(),
+            </if>
+            <if test="userAcct != null and userAcct != ''">
                 last_modified_by = #{lastModifiedBy},
-                id_card = #{identityCard}
+            </if>
+            <if test="userAcct != null and userAcct != ''">
+                id_card = #{identityCard},
+            </if>
+            version = version + 1
             WHERE
-                user_code = #{userCode}
+            user_code = #{userCode}
+        </set>
     </update>
+
+    <!--=================================删除门店信息部分===================================-->
+    <!-- 批量删除门店信息 -->
+    <update id="deleteStoreInfo" parameterType="java.util.Map">
+        UPDATE
+            t_store_info
+            SET
+            is_deleted = 1,
+            gmt_modified = NOW(),
+            last_modified_by = #{last_modified_by}
+            WHERE user_code
+            IN
+            <foreach collection="user_code_list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+    </update>
+    <!-- 批量门店用户信息 -->
+    <update id="deleteUserInfo" parameterType="java.util.Map">
+        UPDATE
+            t_sys_user
+            SET
+            is_deleted = 1,
+            gmt_modified = NOW(),
+            last_modified_by = #{last_modified_by}
+            WHERE user_code
+            IN
+            <foreach collection="user_code_list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+    </update>
+    <!-- 批量门店用户角色信息 -->
+    <update id="deleteRoleUserInfo" parameterType="java.util.Map">
+        UPDATE
+            t_sys_user_role
+            SET
+            is_deleted = 1,
+            gmt_modified = NOW(),
+            last_modified_by = #{last_modified_by}
+            WHERE user_code
+            IN
+            <foreach collection="user_code_list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+            and role_code = '3'
+    </update>
+    <!-- 查询是否还有角色 -->
+    <select id="listHaveRoleUser" parameterType="java.util.Map" resultType="java.lang.String">
+        SELECT user_code FROM t_store_info WHERE user_code = #{userCode};
+    </select>
+
 
 </mapper>

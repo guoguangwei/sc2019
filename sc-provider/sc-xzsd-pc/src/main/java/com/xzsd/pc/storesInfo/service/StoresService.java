@@ -58,4 +58,12 @@ public interface StoresService {
      * @Date: 2019/10/13
      */
     AppResponse findStoreById(String id);
+
+    /**
+     * @author: guo
+     * @deprecated: 批量删除门店信息
+     * @Date: 2019/10/14
+     * @return
+     */
+    AppResponse deleteStoreInfo(Map<String, Object> map);
 }

@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import static com.neusoft.core.page.PageUtils.getPageInfo;
 public class StoresServiceImpl implements StoresService {
 
     private static final Logger logger = LoggerFactory.getLogger(StoresServiceImpl.class);
+//    private final Logger logger = LoggerFactory.getLogger(this.getClass);
 
     @Autowired
     private StoresDao storesDao;
@@ -41,7 +44,6 @@ public class StoresServiceImpl implements StoresService {
      * @Date: 2019/10/12
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public AppResponse findAllStoreInfo(Map<String, Object> retMap) {
 
         try {
@@ -51,7 +53,7 @@ public class StoresServiceImpl implements StoresService {
             int limit = retMap.get("pageSize") == null ? 10 : Integer.parseInt(retMap.get("pageSize").toString());
             //调用PageHelper类中的startPage方法
             PageHelper.startPage(currentPage, limit);
-            List storesInfoList = null;
+            List storesInfoList;
             Page page = new Page();
 
             try {
@@ -68,12 +70,13 @@ public class StoresServiceImpl implements StoresService {
 
             page.setTotalRecord((int) new PageInfo<>(storesInfoList).getTotal());
             page.setRecords(storesInfoList);
+            page.setCurrentPage(currentPage);
+            page.setPageSize(limit);
+
             return AppResponse.success("查询门店信息成功", page);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
-            //手动开启事务回滚
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return AppResponse.serverError("查询门店信息失败，请联系系统管理员");
         }
     }
@@ -91,7 +94,7 @@ public class StoresServiceImpl implements StoresService {
             proList = storesDao.findProvince(province);
             System.out.println(proList);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.success("省份信息获取失败!");
         }
@@ -111,12 +114,12 @@ public class StoresServiceImpl implements StoresService {
         try {
             couList = storesDao.findCounty(county);
             System.out.println(couList);
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.success("城市、区信息获取失败!");
         }
 
-        return AppResponse.success("省份信息获取成功!", getPageInfo(couList));
+        return AppResponse.success("城市、区信息获取成功!", getPageInfo(couList));
     }
 
     /**
@@ -136,7 +139,7 @@ public class StoresServiceImpl implements StoresService {
             System.out.println(pList);
             cList = storesDao.findCountys(county);
             System.out.println(cList);
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.serverError("获取省份和城市失败！");
         }
@@ -156,7 +159,7 @@ public class StoresServiceImpl implements StoresService {
         Store store;
         try {
             store = storesDao.findStoreById(id);
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.serverError("获取修改门店信息失败！");
         }
@@ -173,6 +176,12 @@ public class StoresServiceImpl implements StoresService {
     public AppResponse updateStore(Store store) {
 
         try {
+            //验证账号是否已存在，
+            int account = storesDao.haveAccount(store);
+            if (0 != account) {
+                return AppResponse.bizError("该账号名或电话号码已存在，请重新输入！");
+            }
+
             //更新门店信息
             int updateStore = storesDao.updateStoreInfo(store);
             System.out.println(updateStore);
@@ -185,20 +194,14 @@ public class StoresServiceImpl implements StoresService {
             int updateStoreAcc = storesDao.updateStoreAccount(store);
             System.out.println(updateStoreAcc);
 
-            //验证账号是否已存在，
-            int account = storesDao.haveAccount(store);
-            if ( 0 != account ) {
-                return AppResponse.bizError("该账号名或电话号码已存在，请重新输入！");
-            }
-
             //判断两个添加方法是否全部成功执行
-            if(updateStore > 0 && updateStoreAcc > 0) {
+            if (updateStore > 0 && updateStoreAcc > 0) {
                 return AppResponse.success("更新门店信息成功！");
-            }else {
+            } else {
                 return AppResponse.serverError("更新门店信息失败，请联系管理员！");
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return AppResponse.serverError("更新门店信息失败！");
@@ -218,7 +221,7 @@ public class StoresServiceImpl implements StoresService {
         try {
             //验证账号是否已存在，
             int account = storesDao.haveAccount(store);
-            if ( 0 != account ) {
+            if (0 != account) {
                 return AppResponse.bizError("该账号名或电话号码已存在，请重新输入！");
             }
             //手动设置id的值，随机生成
@@ -251,7 +254,7 @@ public class StoresServiceImpl implements StoresService {
             //查询账户角色是否已有默认角色
             if (storesDao.userRole(userRole) > 0) {
                 userRole.setIsDefault(0);
-            }else {
+            } else {
                 userRole.setIsDefault(1);
             }
 
@@ -259,16 +262,52 @@ public class StoresServiceImpl implements StoresService {
             System.out.println(addUserRo);
 
             //判断三个添加方法是否全部成功执行
-            if(addStoreNumber > 0 && addStoreAcc > 0 && addUserRo > 0) {
+            if (addStoreNumber > 0 && addStoreAcc > 0 && addUserRo > 0) {
                 return AppResponse.success("添加门店信息成功！");
-            }else {
+            } else {
                 return AppResponse.serverError("添加门店信息失败，请联系管理员！");
+            }
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return AppResponse.bizError("添加门店失败，请联系管理员！");
+        }
+    }
+
+    /**
+     * @author: guo
+     * @deprecated: 批量删除门店信息
+     * @Date: 2019/10/13
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AppResponse deleteStoreInfo(@RequestBody Map<String, Object> map) {
+
+        try {
+            ArrayList userCodeList = (ArrayList) map.get("user_code_list");
+            int delStores = storesDao.deleteStoreInfo(map);
+            int delUsers = storesDao.deleteUserInfo(map);
+
+            List<String> haveRoleUser = storesDao.listHaveRoleUser(map);
+            if(haveRoleUser.size() != userCodeList.size()){
+                //得到没有角色的用户列表
+                userCodeList.removeAll(haveRoleUser);
+                map.put("user_code_list", userCodeList);
+                //删除没角色的用户信息
+                storesDao.deleteRoleUserInfo(map);
+            }
+
+            if (delStores > 0 && delUsers > 0) {
+                return AppResponse.success("删除司机及司机角色信息成功");
+            } else {
+                return AppResponse.serverError("删除司机信息失败，请联系系统管理员");
             }
 
         }catch (Exception e) {
             logger.info(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return AppResponse.bizError("添加门店失败，请联系管理员！");
+            return AppResponse.serverError("删除门店信息失败，请联系系统管理员");
         }
     }
 }
