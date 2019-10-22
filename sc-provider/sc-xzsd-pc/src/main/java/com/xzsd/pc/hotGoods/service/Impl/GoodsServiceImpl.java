@@ -33,10 +33,10 @@ public class GoodsServiceImpl implements GoodsService {
     private GoodsDao goodsDao;
 
     /**
+     * @return
      * @author: guo
      * @deprecated: 查询热门商品
      * @data: 2019/10/15
-     * @return
      */
     @Override
     public AppResponse findGoodsInfo(Map<String, Object> retMap) {
@@ -50,7 +50,7 @@ public class GoodsServiceImpl implements GoodsService {
 
             try {
                 godsInfoList = goodsDao.findGoodsInfo(retMap);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 logger.error(e.getMessage());
                 return AppResponse.serverError("查询热门信息失败，请联系系统管理员");
             }
@@ -67,17 +67,17 @@ public class GoodsServiceImpl implements GoodsService {
             return AppResponse.success("查询成功", page);
 
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.serverError("查询司机信息失败，请联系系统管理员");
         }
     }
 
     /**
-     * @author: guo
-     * @deprecated: 查询热门商品,二级查询
-     * @data: 2019/10/15
      * @return
+     * @author: guo
+     * @deprecated: 查询热门商品, 二级查询
+     * @data: 2019/10/15
      */
     @Override
     public AppResponse getPageTGoodsSku(Map<String, Object> resMap) {
@@ -90,13 +90,13 @@ public class GoodsServiceImpl implements GoodsService {
             Page page = new Page();
 
             try {
-                PageTGoodsList =  goodsDao.getPageTGoodsSku(resMap);
-            }catch (Exception e) {
+                PageTGoodsList = goodsDao.getPageTGoodsSku(resMap);
+            } catch (Exception e) {
                 logger.error(e.getMessage());
                 return AppResponse.serverError("二级查询热门信息失败，请联系系统管理员");
             }
 
-            if(CollectionUtils.isEmpty(PageTGoodsList)) {
+            if (CollectionUtils.isEmpty(PageTGoodsList)) {
                 return AppResponse.serverError("二级查询热门信息失败，请联系系统管理员");
             }
 
@@ -106,17 +106,17 @@ public class GoodsServiceImpl implements GoodsService {
             page.setPageSize(limit);
             return AppResponse.success("查询成功", page);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.serverError("二级查询热门信息失败，请联系系统管理员");
         }
     }
 
     /**
+     * @return
      * @author: guo
      * @deprecated: 添加热门商品
      * @data: 2019/10/15
-     * @return
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -137,10 +137,10 @@ public class GoodsServiceImpl implements GoodsService {
             int addGoods = goodsDao.additionGoods(homeHotGoods);
             if (addGoods > 0) {
                 return AppResponse.success("热门信息添加成功");
-            }else {
+            } else {
                 return AppResponse.bizError("热门信息添加失败");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return AppResponse.bizError("添加门店失败，请联系管理员！");
@@ -149,10 +149,10 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     /**
+     * @return
      * @author: guo
      * @deprecated: 回显修改热门商品信息
      * @data: 2019/10/15
-     * @return
      */
     @Override
     public AppResponse showUpdateInfo(HomeHotGoods homeHotGoods, Goods goods) {
@@ -160,17 +160,17 @@ public class GoodsServiceImpl implements GoodsService {
         List<HomeHotGoods> hotList = null;
         try {
             hotList = goodsDao.showUpdateInfo(homeHotGoods);
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
         return AppResponse.success("回显热门商品数据成功", getPageInfo(hotList));
     }
 
     /**
+     * @return
      * @author: guo
      * @deprecated: 修改热门商品信息
      * @data: 2019/10/15
-     * @return
      */
     @Override
     public AppResponse updateHotGoodsInfo(HomeHotGoods homeHotGoods) {
@@ -190,10 +190,10 @@ public class GoodsServiceImpl implements GoodsService {
             int addGoods = goodsDao.updateHotGoodsInfo(homeHotGoods);
             if (addGoods > 0) {
                 return AppResponse.success("热门信息添加成功");
-            }else {
+            } else {
                 return AppResponse.bizError("热门信息添加失败");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info(e.getMessage());
             return AppResponse.bizError("添加门店失败，请联系管理员！");
         }
@@ -201,33 +201,26 @@ public class GoodsServiceImpl implements GoodsService {
 
 
     /**
+     * @param idList
+     * @return
      * @author: guo
      * @deprecated: 删除热门商品信息
      * @data: 2019/10/16
-     * @return
      */
     @Override
-    public AppResponse deleteHotGoodsInfo(Map delMap) {
+    public AppResponse deleteHotGoodsInfo(ArrayList<String> idList) {
 
         try {
-            ArrayList idList = (ArrayList) delMap.get("id_list");
-
             int count = 0;
-            for (int i = 0; i < idList.size(); i++) {
-                String id = (String) idList.get(i);
-//                Sy    stem.out.println(id);
-                int delNum = goodsDao.deleteHotGoodsInfo(id);
-                if(delNum > 0) {
-                    count ++;
-                }
-            }
-            if(count > 0) {
-                return AppResponse.success("成功删除"+count+"条热门信息");
-            }else {
+            count = goodsDao.deleteHotGoodsInfo(idList);
+
+            if (count > 0) {
+                return AppResponse.success("成功删除" + count + "条热门信息");
+            } else {
                 return AppResponse.success("删除热门信息失败");
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
             return AppResponse.bizError("删除商品失败");
         }

@@ -8,10 +8,12 @@ import com.xzsd.pc.hotGoods.service.GoodsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -92,14 +94,11 @@ public class GoodsController {
      * @return
      */
     @RequestMapping(value = "/delHotGoodsInfo", method = RequestMethod.POST)
-    public AppResponse deleteHotGoodsInfo(@RequestBody ArrayList<String> id_list) {
+    public AppResponse deleteHotGoodsInfo(@RequestParam("idList") ArrayList<String> idList) {
 
         String skuNo = SecurityUtils.getCurrentUserId();
-        Map delMap = new HashMap(2);
 
-        delMap.put("id_list", id_list);
-        delMap.put("last_modified_by", skuNo == null ? "null" : skuNo);
-        AppResponse appResponse = goodsService.deleteHotGoodsInfo(delMap);
+        AppResponse appResponse = goodsService.deleteHotGoodsInfo(idList);
 
         return appResponse;
     }

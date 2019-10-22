@@ -6,25 +6,25 @@
     <select id="findGoodsInfo" resultType="com.xzsd.pc.hotGoods.entity.Goods">
 
         SELECT
-            gh.selling_price,
-            gh.advertising,
-            gh.gmt_create,
-            hhg.id,
-            hhg.sku_no,
-            hhg.sku_name,
-            hhg.sort_no
-            FROM t_goods_sku AS gh
-            LEFT JOIN t_home_hot_goods AS hhg
-            ON gh.sku_no = hhg.sku_no
-            WHERE gh.is_deleted = 0
-            AND hhg.is_deleted = 0
-            <if test="skuNo != null and skuNo != ''">
-                AND gh.sku_no like concat('%', #{skuNo}, '%')
-            </if>
-            <if test="skuName != null and skuName != ''">
-                AND gh.sku_name like concat('%', #{skuName}, '%')
-            </if>
-            ORDER BY hhg.sort_no
+        gh.selling_price,
+        gh.advertising,
+        gh.gmt_create,
+        hhg.id,
+        hhg.sku_no,
+        hhg.sku_name,
+        hhg.sort_no
+        FROM t_goods_sku AS gh
+        LEFT JOIN t_home_hot_goods AS hhg
+        ON gh.sku_no = hhg.sku_no
+        WHERE gh.is_deleted = 0
+        AND hhg.is_deleted = 0
+        <if test="skuNo != null and skuNo != ''">
+            AND gh.sku_no like concat('%', #{skuNo}, '%')
+        </if>
+        <if test="skuName != null and skuName != ''">
+            AND gh.sku_name like concat('%', #{skuName}, '%')
+        </if>
+        ORDER BY hhg.sort_no
     </select>
 
     <!--================================新增商品相关操作=================================-->
@@ -59,42 +59,42 @@
         ON t.cate_code = c.cate_code
         LEFT JOIN t_code_cate d
         ON c.cate_code_parent = d.cate_code
-            <where>
-                <if test="skuNo != null and skuNo != ''">
-                    t.sku_no like concat('%', #{skuNo}, '%')
-                </if>
-                <if test="skuName != null and skuName != ''">
-                    AND t.sku_name like concat('%', #{skuName}, '%')
-                </if>
-            </where>
+        <where>
+            <if test="skuNo != null and skuNo != ''">
+                t.sku_no like concat('%', #{skuNo}, '%')
+            </if>
+            <if test="skuName != null and skuName != ''">
+                AND t.sku_name like concat('%', #{skuName}, '%')
+            </if>
+        </where>
 
     </select>
 
     <!-- 查询该热门商品是否已存在 -->
     <select id="havedGoods" resultType="java.lang.Integer" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
         SELECT COUNT(sku_no)
-            FROM t_home_hot_goods
-            WHERE is_deleted = 0
-            AND sku_no = #{skuNo}
-            <if test="id != null and id != ''">
-                AND id &lt;&gt;id
-            </if>
+        FROM t_home_hot_goods
+        WHERE is_deleted = 0
+        AND sku_no = #{skuNo}
+        <if test="id != null and id != ''">
+            AND id &lt;&gt;id
+        </if>
     </select>
 
     <!-- 查询该排序号是否已存在 -->
     <select id="havedOrderID" resultType="java.lang.Integer" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
         SELECT
-            COUNT(t_home_hot_goods.sort_no)
-            AS num
-            FROM t_goods_sku
-            LEFT JOIN t_home_hot_goods
-            ON t_goods_sku.sku_no = t_home_hot_goods.sku_no
-            WHERE t_goods_sku.is_deleted = 0
-            AND t_home_hot_goods.is_deleted = 0
-            AND t_home_hot_goods.sort_no = #{sortNo}
-            <if test="id != null and id != ''">
-                AND t_home_hot_goods.id &lt;&gt; #{id}
-            </if>
+        COUNT(t_home_hot_goods.sort_no)
+        AS num
+        FROM t_goods_sku
+        LEFT JOIN t_home_hot_goods
+        ON t_goods_sku.sku_no = t_home_hot_goods.sku_no
+        WHERE t_goods_sku.is_deleted = 0
+        AND t_home_hot_goods.is_deleted = 0
+        AND t_home_hot_goods.sort_no = #{sortNo}
+        <if test="id != null and id != ''">
+            AND t_home_hot_goods.id &lt;&gt; #{id}
+        </if>
     </select>
 
     <!-- 查询热门商品数量 -->
@@ -127,7 +127,8 @@
     <!--================================更新热门商品相关操作=================================-->
 
     <!-- 回显修改热门商品信息 -->
-    <select id="showUpdateInfo" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods" resultType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+    <select id="showUpdateInfo" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods"
+            resultType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
         SELECT
             id,
             sku_name,
@@ -152,11 +153,14 @@
 
     <!--================================删除热门商品相关操作=================================-->
 
-    <update id="deleteHotGoodsInfo" parameterType="java.lang.String">
+    <update id="deleteHotGoodsInfo">
         UPDATE
-            t_home_hot_goods
-            SET is_deleted = 1
-            WHERE id = #{id}
+        t_home_hot_goods
+        SET is_deleted = 1
+        WHERE id in
+        <foreach collection="idList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </update>
 
     <!--=========PageInfo分页查询========-->

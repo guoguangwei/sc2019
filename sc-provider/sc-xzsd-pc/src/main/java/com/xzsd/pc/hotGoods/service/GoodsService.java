@@ -4,6 +4,7 @@ import com.neusoft.core.restful.AppResponse;
 import com.xzsd.pc.hotGoods.entity.Goods;
 import com.xzsd.pc.hotGoods.entity.HomeHotGoods;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public interface GoodsService {
@@ -53,8 +54,9 @@ public interface GoodsService {
      * @deprecated: 删除热门商品信息
      * @data: 2019/10/16
      * @return
+     * @param idList
      */
-    AppResponse deleteHotGoodsInfo(Map delMap);
+    AppResponse deleteHotGoodsInfo(ArrayList<String> idList);
 
     //================================PageInfo分页查询
 

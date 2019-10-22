@@ -3,8 +3,10 @@ package com.xzsd.pc.hotGoods.dao;
 import com.xzsd.pc.hotGoods.entity.Goods;
 import com.xzsd.pc.hotGoods.entity.HomeHotGoods;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -81,9 +83,9 @@ public interface GoodsDao {
      * @deprecated: 删除热门商品信息
      * @data: 2019/10/16
      * @return
+     * @param idList
      */
-    int deleteHotGoodsInfo(String id);
-
+    int deleteHotGoodsInfo(@Param("idList") ArrayList<String> idList);
 
     //================================PageInfo分页查询
 
