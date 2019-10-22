@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +55,9 @@ public class PatriarchService {
             }
             page.setTotalRecord((int) new PageInfo<>(infoList).getTotal());
             page.setRecords(infoList);
+            page.setCurrentPage(currentPage);
+            page.setPageSize(limit);
+
             return AppResponse.success("查询家长信息成功", page);
         } catch (Exception e) {
             logger.info(e.getMessage());

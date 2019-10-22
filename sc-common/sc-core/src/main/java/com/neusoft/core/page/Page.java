@@ -13,6 +13,19 @@ import java.util.Map;
  * @Date: 2019/5/17
  */
 public class Page<T> implements Serializable {
+    @Override
+    public String toString() {
+        return "Page{" +
+                "pageSize=" + pageSize +
+                ", totalRecord=" + totalRecord +
+                ", currentPage=" + currentPage +
+                ", totalPage=" + totalPage +
+                ", project=" + project +
+                ", records=" + records +
+                ", moreAttrs=" + moreAttrs +
+                '}';
+    }
+
     private static final long serialVersionUID = 1L;
     private int pageSize;
     private int totalRecord;

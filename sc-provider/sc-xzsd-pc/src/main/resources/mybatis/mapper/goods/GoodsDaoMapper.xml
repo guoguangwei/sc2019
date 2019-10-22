@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzsd.pc.hotGoods.dao.GoodsDao">
+
+    <!-- 查询热门商品信息 -->
+    <select id="findGoodsInfo" resultType="com.xzsd.pc.hotGoods.entity.Goods">
+
+        SELECT
+            gh.selling_price,
+            gh.advertising,
+            gh.gmt_create,
+            hhg.id,
+            hhg.sku_no,
+            hhg.sku_name,
+            hhg.sort_no
+            FROM t_goods_sku AS gh
+            LEFT JOIN t_home_hot_goods AS hhg
+            ON gh.sku_no = hhg.sku_no
+            WHERE gh.is_deleted = 0
+            AND hhg.is_deleted = 0
+            <if test="skuNo != null and skuNo != ''">
+                AND gh.sku_no like concat('%', #{skuNo}, '%')
+            </if>
+            <if test="skuName != null and skuName != ''">
+                AND gh.sku_name like concat('%', #{skuName}, '%')
+            </if>
+            ORDER BY hhg.sort_no
+    </select>
+
+    <!--================================新增商品相关操作=================================-->
+
+    <!-- 查询二级热门商品信息 -->
+    <select id="getPageTGoodsSku" resultType="com.xzsd.pc.hotGoods.entity.Goods">
+        select
+        t.sku_no,
+        t.sku_name,
+        t.cate_code,
+        t.fix_price,
+        t.cost_price,
+        t.selling_price,
+        t.sale_cnt,
+        t.channel_type,
+        t.star_level,
+        t.putaway_time,
+        t.status,
+        t.browse_count,
+        t.author,
+        t.advertising,
+        t.isbn,
+        t.press,
+        t.detail,
+        t.gmt_create gmtCreate,
+        t.browse_count browseCount,
+        c.cate_name twoLevel,
+        d.cate_name oneLevel
+        FROM
+        t_goods_sku t
+        LEFT JOIN t_code_cate c
+        ON t.cate_code = c.cate_code
+        LEFT JOIN t_code_cate d
+        ON c.cate_code_parent = d.cate_code
+            <where>
+                <if test="skuNo != null and skuNo != ''">
+                    t.sku_no like concat('%', #{skuNo}, '%')
+                </if>
+                <if test="skuName != null and skuName != ''">
+                    AND t.sku_name like concat('%', #{skuName}, '%')
+                </if>
+            </where>
+
+    </select>
+
+    <!-- 查询该热门商品是否已存在 -->
+    <select id="havedGoods" resultType="java.lang.Integer" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+        SELECT COUNT(sku_no)
+            FROM t_home_hot_goods
+            WHERE is_deleted = 0
+            AND sku_no = #{skuNo}
+            <if test="id != null and id != ''">
+                AND id &lt;&gt;id
+            </if>
+    </select>
+
+    <!-- 查询该排序号是否已存在 -->
+    <select id="havedOrderID" resultType="java.lang.Integer" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+        SELECT
+            COUNT(t_home_hot_goods.sort_no)
+            AS num
+            FROM t_goods_sku
+            LEFT JOIN t_home_hot_goods
+            ON t_goods_sku.sku_no = t_home_hot_goods.sku_no
+            WHERE t_goods_sku.is_deleted = 0
+            AND t_home_hot_goods.is_deleted = 0
+            AND t_home_hot_goods.sort_no = #{sortNo}
+            <if test="id != null and id != ''">
+                AND t_home_hot_goods.id &lt;&gt; #{id}
+            </if>
+    </select>
+
+    <!-- 查询热门商品数量 -->
+    <select id="hotGoodsCount" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods" resultType="java.lang.Integer">
+        SELECT COUNT(t_home_hot_goods.sku_no)
+            FROM t_goods_sku
+            LEFT JOIN t_home_hot_goods
+            ON t_goods_sku.sku_no = t_home_hot_goods.sku_no
+            WHERE t_goods_sku.is_deleted = 0
+            AND t_home_hot_goods.is_deleted = 0
+            ORDER BY t_home_hot_goods.sort_no
+    </select>
+
+    <!-- 添加热门商品-->
+    <insert id="additionGoods" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+        INSERT INTO
+            t_home_hot_goods
+            VALUES(#{skuNo},
+            #{skuName},
+            0,
+            #{id},
+            #{sortNo},
+            NOW(),
+            #{skuNo},
+            NOW(),
+            #{skuNo},
+            0)
+    </insert>
+
+    <!--================================更新热门商品相关操作=================================-->
+
+    <!-- 回显修改热门商品信息 -->
+    <select id="showUpdateInfo" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods" resultType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+        SELECT
+            id,
+            sku_name,
+            sort_no,
+            sku_no
+            FROM t_home_hot_goods
+            WHERE id = #{id}
+    </select>
+
+    <!-- 更新热门商品信息 -->
+    <update id="updateHotGoodsInfo" parameterType="com.xzsd.pc.hotGoods.entity.HomeHotGoods">
+        UPDATE
+            t_home_hot_goods
+            SET sku_no = #{skuNo},
+            sku_name = #{skuName},
+            sort_no = #{sortNo},
+            gmt_modified = NOW(),
+            last_modified_by = #{skuNo},
+            version = version + 1
+            WHERE id = #{id}
+    </update>
+
+    <!--================================删除热门商品相关操作=================================-->
+
+    <update id="deleteHotGoodsInfo" parameterType="java.lang.String">
+        UPDATE
+            t_home_hot_goods
+            SET is_deleted = 1
+            WHERE id = #{id}
+    </update>
+
+    <!--=========PageInfo分页查询========-->
+
+    <select id="Submenu" resultType="com.xzsd.pc.hotGoods.entity.Goods">
+        select
+        t.sku_no,
+        t.sku_name,
+        t.cate_code,
+        t.fix_price,
+        t.cost_price,
+        t.selling_price,
+        t.sale_cnt,
+        t.channel_type,
+        t.star_level,
+        t.putaway_time,
+        t.status,
+        t.browse_count,
+        t.author,
+        t.advertising,
+        t.isbn,
+        t.press,
+        t.detail,
+        t.gmt_create gmtCreate,
+        t.browse_count browseCount,
+        c.cate_name twoLevel,
+        d.cate_name oneLevel
+        FROM
+        t_goods_sku t
+        LEFT JOIN t_code_cate c
+        ON t.cate_code = c.cate_code
+        LEFT JOIN t_code_cate d
+        ON c.cate_code_parent = d.cate_code
+        <where>
+            <if test="skuNo != null and skuNo != ''">
+                t.sku_no = #{skuNo}
+            </if>
+            <if test="skuName != null and skuName != ''">
+                AND t.sku_name = #{skuName}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>

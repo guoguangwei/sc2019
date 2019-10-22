@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -282,7 +281,7 @@ public class StoresServiceImpl implements StoresService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AppResponse deleteStoreInfo(@RequestBody Map<String, Object> map) {
+    public AppResponse deleteStoreInfo(Map<String, Object> map) {
 
         try {
             ArrayList userCodeList = (ArrayList) map.get("user_code_list");

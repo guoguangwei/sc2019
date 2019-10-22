@@ -113,8 +113,7 @@ public class StoresController {
      * @Date: 2019/10/13
      */
     @RequestMapping(value = "/delStores", method = RequestMethod.POST)
-    public AppResponse deleteStores(@RequestParam(value = "user_code_list")ArrayList list) {
-
+    public AppResponse deleteStores(@RequestParam("list") ArrayList list) {
         String userCode = SecurityUtils.getCurrentUserId();
         Map map = new HashMap(2);
 
@@ -123,6 +122,5 @@ public class StoresController {
         AppResponse appResponse = storesService.deleteStoreInfo(map);
         return appResponse;
     }
-
 
 }
