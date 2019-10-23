@@ -298,9 +298,9 @@ public class StoresServiceImpl implements StoresService {
             }
 
             if (delStores > 0 && delUsers > 0) {
-                return AppResponse.success("删除司机及司机角色信息成功");
+                return AppResponse.success("删除门店及门店角色信息成功");
             } else {
-                return AppResponse.serverError("删除司机信息失败，请联系系统管理员");
+                return AppResponse.serverError("删除门店信息失败，请联系系统管理员");
             }
 
         }catch (Exception e) {
